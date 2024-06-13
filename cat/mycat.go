@@ -21,6 +21,7 @@ func checkArgs() {
 	}
 }
 
+// :3
 func readText() {
 	file, err := os.Open(os.Args[1])
 	if err != nil {
