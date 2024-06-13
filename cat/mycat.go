@@ -7,29 +7,36 @@ import (
 )
 
 func main() {
-	fmt.Println("Начало работы программы")
-	checkArgs()
-	fmt.Println("Конец работы программы")
-}
-
-func checkArgs() {
-	numberOfArgs := len(os.Args)
-	if numberOfArgs == 2 {
-		readText()
-	} else {
+	if checkArgs(os.Args) == false {
 		fmt.Println("Укажите только один файл")
-	}
-}
-
-func readText() {
-	file, err := os.Open(os.Args[1])
-	if err != nil {
-		fmt.Println("Проверьте правильность указанных файлов")
 	} else {
-		fmt.Println("Чтение файла...")
-		Data := bufio.NewScanner(file)
-		for Data.Scan() {
-			fmt.Printf("%s\n", Data.Text())
+		err := readText(os.Args[1])
+		if err != nil {
+			fmt.Println("Проверьте правильность указанного файла")
 		}
 	}
+}
+
+func checkArgs(args []string) bool {
+	numberOfArgs := len(args)
+	if numberOfArgs == 2 {
+		return true
+	} else {
+		return false
+	}
+}
+
+func readText(fileName string) error {
+	file, err := os.Open(fileName)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	fmt.Println("Чтение файла...")
+	Data := bufio.NewScanner(file)
+	for Data.Scan() {
+		fmt.Printf("%s\n", Data.Text())
+	}
+	return nil
 }
