@@ -1,42 +1,52 @@
 package main
 
 import (
-	"bufio"
+	// "bufio"
+	// "bytes"
 	"fmt"
+	"io"
 	"os"
+	// "strings"
 )
 
 func main() {
-	if checkArgs(os.Args) == false {
+	if !checkArgs(os.Args) {
 		fmt.Println("Укажите только один файл")
-	} else {
-		err := readText(os.Args[1])
-		if err != nil {
-			fmt.Println("Проверьте правильность указанного файла")
-		}
+		return
 	}
-}
 
-func checkArgs(args []string) bool {
-	numberOfArgs := len(args)
-	if numberOfArgs == 2 {
-		return true
-	} else {
-		return false
-	}
-}
-
-func readText(fileName string) error {
-	file, err := os.Open(fileName)
+	file, err := os.Open(os.Args[1])
 	if err != nil {
-		return err
+		fmt.Printf("os.Open: %s", err.Error())
+		return
 	}
 	defer file.Close()
 
-	fmt.Println("Чтение файла...")
-	Data := bufio.NewScanner(file)
-	for Data.Scan() {
-		fmt.Printf("%s\n", Data.Text())
+	if err := readText(file, os.Stdout); err != nil {
+		fmt.Printf("readText: %s\n", err.Error())
 	}
+}
+
+// 	r := strings.NewReader("Тестовое содержимое файла")
+
+// 	var buf bytes.Buffer
+
+// 	if err := readText(r, &buf); err != nil {
+// 		fmt.Printf("readText: %s\n", err.Error())
+// 	}
+
+// 	fmt.Println(buf.String() == "Тестовое содержимое файла")
+// }
+
+func checkArgs(args []string) bool {
+	return len(args) == 2
+}
+
+func readText(r io.Reader, w io.Writer) error {
+	_, err := io.Copy(w, r)
+	if err != nil {
+		fmt.Printf("io.Copy: %s\n", err.Error())
+	}
+
 	return nil
 }
