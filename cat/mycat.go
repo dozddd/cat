@@ -3,6 +3,7 @@ package main
 import (
 	// "bufio"
 	// "bytes"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -43,6 +44,12 @@ func checkArgs(args []string) bool {
 }
 
 func readText(r io.Reader, w io.Writer) error {
+	if r == nil {
+		return errors.New("reader is nil")
+	}
+	if w == nil {
+		return errors.New("writer is nil")
+	}
 	_, err := io.Copy(w, r)
 	if err != nil {
 		fmt.Printf("io.Copy: %s\n", err.Error())

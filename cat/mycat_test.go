@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"io"
 	"strings"
 	"testing"
@@ -43,40 +44,60 @@ func TestReadText(t *testing.T) {
 	testCases := []struct {
 		name           string
 		reader         io.Reader
+		writer         io.Writer
 		expectedOutput string
 		expectedError  error
 	}{
 		{
 			name:           "Чтение файла",
 			reader:         strings.NewReader("Первая строка\nВторая строка\nТретья строка"),
+			writer:         &bytes.Buffer{},
 			expectedOutput: "Первая строка\nВторая строка\nТретья строка",
 			expectedError:  nil,
 		},
 		{
 			name:           "Одна строка",
 			reader:         strings.NewReader("Первая строка"),
+			writer:         &bytes.Buffer{},
 			expectedOutput: "Первая строка",
 			expectedError:  nil,
 		},
 		{
 			name:           "Пустой файл",
 			reader:         strings.NewReader(""),
+			writer:         &bytes.Buffer{},
 			expectedOutput: "",
 			expectedError:  nil,
 		},
+		{
+			name:           "nil reader",
+			reader:         nil,
+			writer:         &bytes.Buffer{},
+			expectedOutput: "",
+			expectedError:  errors.New("reader is nil"),
+		},
+		{
+			name:           "nil writer",
+			reader:         strings.NewReader("Первая строка"),
+			writer:         nil,
+			expectedOutput: "",
+			expectedError:  errors.New("writer is nil"),
+		},
 	}
 
-	for _, testCases := range testCases {
-		t.Run(testCases.name, func(t *testing.T) {
-			var buf bytes.Buffer
-			actual := readText(testCases.reader, &buf)
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			actual := readText(testCase.reader, testCase.writer)
 
-			if actual != testCases.expectedError {
+			if actual != testCase.expectedError && !(actual != nil && testCase.expectedError != nil && actual.Error() == testCase.expectedError.Error()) {
 				t.Fail()
 			}
 
-			if buf.String() != testCases.expectedOutput {
-				t.Fail()
+			if testCase.writer != nil {
+				actualOutput := testCase.writer.(*bytes.Buffer).String()
+				if actualOutput != testCase.expectedOutput {
+					t.Fail()
+				}
 			}
 		})
 	}
