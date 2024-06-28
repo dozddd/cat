@@ -10,6 +10,11 @@ import (
 	// "strings"
 )
 
+var (
+	ReaderIsNilErr = errors.New("reader is nil")
+	WriterIsNilErr = errors.New("writer is nil")
+)
+
 func main() {
 	if !checkArgs(os.Args) {
 		fmt.Println("Укажите только один файл")
@@ -28,31 +33,22 @@ func main() {
 	}
 }
 
-// 	r := strings.NewReader("Тестовое содержимое файла")
-
-// 	var buf bytes.Buffer
-
-// 	if err := readText(r, &buf); err != nil {
-// 		fmt.Printf("readText: %s\n", err.Error())
-// 	}
-
-// 	fmt.Println(buf.String() == "Тестовое содержимое файла")
-// }
-
 func checkArgs(args []string) bool {
 	return len(args) == 2
 }
 
 func readText(r io.Reader, w io.Writer) error {
 	if r == nil {
-		return errors.New("reader is nil")
+		return ReaderIsNilErr
 	}
+
 	if w == nil {
-		return errors.New("writer is nil")
+		return WriterIsNilErr
 	}
+
 	_, err := io.Copy(w, r)
 	if err != nil {
-		fmt.Printf("io.Copy: %s\n", err.Error())
+		return fmt.Errorf("io.Copy: %w", err)
 	}
 
 	return nil

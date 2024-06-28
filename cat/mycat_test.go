@@ -74,23 +74,24 @@ func TestReadText(t *testing.T) {
 			reader:         nil,
 			writer:         &bytes.Buffer{},
 			expectedOutput: "",
-			expectedError:  errors.New("reader is nil"),
+			expectedError:  ReaderIsNilErr,
 		},
 		{
 			name:           "nil writer",
 			reader:         strings.NewReader("Первая строка"),
 			writer:         nil,
 			expectedOutput: "",
-			expectedError:  errors.New("writer is nil"),
+			expectedError:  WriterIsNilErr,
 		},
 	}
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			actual := readText(testCase.reader, testCase.writer)
-
-			if actual != testCase.expectedError && !(actual != nil && testCase.expectedError != nil && actual.Error() == testCase.expectedError.Error()) {
-				t.Fail()
+			err := readText(testCase.reader, testCase.writer)
+			if testCase.expectedError != nil {
+				if !errors.Is(err, testCase.expectedError) {
+					t.Fail()
+				}
 			}
 
 			if testCase.writer != nil {
